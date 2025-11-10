@@ -36,6 +36,7 @@ const pool = mysql.createPool({
     port: process.env.DB_PORT || 3306, 
     ssl: { "rejectUnauthorized": true }, 
 
+    ssl: { "rejectUnauthorized": true },
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
