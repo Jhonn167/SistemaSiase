@@ -1,21 +1,41 @@
-// 1. Importar las librerías
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
-
-// 2. Configurar el servidor Express
 const app = express();
 const port = 3000;
-app.use(cors());
-app.use(express.json()); // Middleware para entender JSON
-app.use(express.static('frontend')); // Servir archivos estáticos
 
-// 3. Configurar la conexión a la base de datos MySQL
+
+const allowedOrigins = [
+    'https://sistemasiase.onrender.com', 
+    'http://localhost:3000',             
+    'http://localhost:5500',             
+    'http://127.0.0.1:5500',               
+    'https://sistema-siase.vercel.app',
+];
+
+const corsOptions = {
+    origin: function (origin, callback) {
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            const msg = 'La política de CORS para este sitio no permite acceso desde el origen especificado.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    }
+};
+app.use(cors(corsOptions)); 
+app.use(express.json()); 
+app.use(express.static('frontend')); 
+
+
 const pool = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: '16112002', // <-- ¡RECUERDA PONER TU CONTRASEÑA!
-    database: 'proyecto_escuela',
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '16112002', 
+    database: process.env.DB_DATABASE || 'proyecto_escuela',
+    port: process.env.DB_PORT || 3306, 
+    ssl: { "rejectUnauthorized": true }, 
+
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
@@ -23,9 +43,6 @@ const pool = mysql.createPool({
 
 console.log("Conectando a la base de datos MySQL...");
 
-// ====================================================
-// API DE LOGIN
-// ====================================================
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
     console.log(`Intento de login para: ${email}`);
@@ -54,9 +71,6 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// ====================================================
-// API DE ALUMNOS (CRUD)
-// ====================================================
 
 // GET (Singular)
 app.get('/api/alumnos/usuario/:idUsuario', async (req, res) => {
@@ -74,10 +88,9 @@ app.get('/api/alumnos/usuario/:idUsuario', async (req, res) => {
     }
 });
 
-// GET (Plural) - (¡¡MODIFICADA!!)
+// GET (Plural) 
 app.get('/api/alumnos', async (req, res) => {
     console.log("Petición para GET /api/alumnos (todos)");
-    // !! CORRECCIÓN: Añadido U.ID_Usuario para la función de editar
     const query = `
         SELECT A.ID_Alumno, A.Matricula, A.NombreCompleto, U.Email, A.Carrera, U.ID_Usuario
         FROM Alumnos AS A
@@ -118,7 +131,7 @@ app.post('/api/alumnos', async (req, res) => {
     }
 });
 
-// PUT (Actualizar) - (¡¡NUEVA!!)
+// PUT (Actualizar)
 app.put('/api/alumnos/:idAlumno', async (req, res) => {
     const { idAlumno } = req.params;
     const { nombre, email, matricula, carrera, idUsuario } = req.body;
@@ -193,10 +206,6 @@ app.delete('/api/alumnos/:idAlumno', async (req, res) => {
     }
 });
 
-// ====================================================
-// API DE PROFESORES (CRUD)
-// ====================================================
-
 // GET (Plural)
 app.get('/api/profesores', async (req, res) => {
     const query = `
@@ -269,9 +278,6 @@ app.delete('/api/profesores/:idProfesor', async (req, res) => {
     }
 });
 
-// ====================================================
-// API DE INSCRIPCIONES (Para Alumnos)
-// ====================================================
 
 // (POST, GET, DELETE para Inscripciones... sin cambios)
 app.post('/api/inscripciones', async (req, res) => {
@@ -320,9 +326,7 @@ app.delete('/api/inscripciones', async (req, res) => {
 });
 
 
-// ====================================================
-// API DE MATERIAS (Para Alumnos)
-// ====================================================
+
 app.get('/api/materias', async (req, res) => {
     console.log("¡Recibí una petición para /api/materias!");
     const query = `
@@ -370,9 +374,6 @@ app.get('/api/materias', async (req, res) => {
     }
 });
 
-// ====================================================
-// API PARA CATÁLOGO DE MATERIAS (Para Admin)
-// ====================================================
 
 // GET (Plural)
 app.get('/api/catalogo/materias', async (req, res) => {
@@ -461,11 +462,6 @@ app.delete('/api/catalogo/materias/:idMateria', async (req, res) => {
     }
 });
 
-
-// ====================================================
-// APIs DE GESTIÓN DE GRUPOS
-// ====================================================
-
 // GET (Leer Periodos)
 app.get('/api/periodos', async (req, res) => {
     const query = `SELECT ID_Periodo, Nombre FROM Periodos_Escolares WHERE Estatus IN ('Activo', 'Futuro')`;
@@ -546,9 +542,6 @@ app.post('/api/grupos', async (req, res) => {
     }
 });
 
-// ====================================================
-// APIs DE GESTIÓN DE CALIFICACIONES
-// ====================================================
 
 // GET (Leer alumnos por grupo)
 app.get('/api/inscripciones/grupo/:idGrupo', async (req, res) => {
@@ -576,7 +569,6 @@ app.get('/api/inscripciones/grupo/:idGrupo', async (req, res) => {
     }
 });
 
-// POST (Guardar/Actualizar calificaciones)
 app.post('/api/calificaciones', async (req, res) => {
     const calificaciones = req.body;
     console.log("Petición para POST /api/calificaciones (guardar)");
@@ -610,8 +602,6 @@ app.post('/api/calificaciones', async (req, res) => {
     }
 });
 
-
-// 6. Encender el servidor
 app.listen(port, () => {
     console.log(`¡Servidor backend corriendo en http://localhost:${port}`);
 });
