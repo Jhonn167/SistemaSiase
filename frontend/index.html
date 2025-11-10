@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIASE - Sistema de Inscripción Académica</title>
+    <style>
+        @import url(css.css);
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div id="loginScreen" class="screen active">
+            <div class="header">
+                <h1>SIASE</h1>
+                <p>Sistema Integral de Administración Escolar</p>
+            </div>
+            <div class="content">
+                <div class="login-form">
+                    <h2 style="text-align: center; color: #333; margin-bottom: 30px;">Iniciar Sesión</h2>
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" placeholder="Ingresa tu email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Contraseña</label>
+                            <input type="password" id="password" placeholder="Ingresa tu contraseña" required>
+                        </div>
+                        <div id="loginError" style="color: red; text-align: center; margin-bottom: 15px;"></div>
+                        <button type="submit" class="btn">Ingresar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="menuScreen" class="screen">
+            <div class="header">
+                <h1>Menú Principal</h1>
+                <p>Bienvenido al Sistema de Inscripción Académica</p>
+            </div>
+            <div class="content">
+                <div class="user-info">
+                    <p><strong>Estudiante:</strong> <span id="studentName">Cargando...</span></p>
+                    <p><strong>Matrícula:</strong> <span id="studentId">Cargando...</span></p>
+                    <p><strong>Semestre:</strong> <span id="semester">5° Semestre (Demo)</span></p>
+                </div>
+                <div class="nav-menu">
+                    <div class="menu-card" onclick="showScreen('materiasScreen')">
+                        <h3> Inscripción</h3>
+                        <p>Inscribir materias del semestre</p>
+                    </div>
+                    <div class="menu-card" onclick="showScreen('horarioScreen')">
+                        <h3> Mi Horario</h3>
+                        <p>Ver horario de clases</p>
+                    </div>
+                    <div class="menu-card" onclick="showScreen('resumenScreen')">
+                        <h3> Resumen</h3>
+                        <p>Ver materias inscritas</p>
+                    </div>
+                    <div class="menu-card" onclick="logout()">
+                        <h3> Cerrar Sesión</h3>
+                        <p>Salir del sistema</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="materiasScreen" class="screen">
+            <div class="header">
+                <h1>Inscripción de Materias</h1>
+                <p>Selecciona las materias que deseas cursar</p>
+            </div>
+            <div class="content">
+                <div class="resumen-inscripcion">
+                    <div class="resumen-item">
+                        <span>Créditos seleccionados:</span>
+                        <span id="creditosActuales">0</span>
+                    </div>
+                    <div class="resumen-item">
+                        <span>Créditos máximos:</span>
+                        <span>45</span>
+                    </div>
+                    <div class="resumen-item">
+                        <span>Materias seleccionadas:</span>
+                        <span id="materiasCount">0</span>
+                    </div>
+                </div>
+                <div id="alertContainer"></div>
+                <h3 style="margin-bottom: 15px; color: #333;">Materias Disponibles</h3>
+                <div class="materias-grid" id="materiasGrid"></div>
+                <button class="btn btn-secondary" onclick="showScreen('menuScreen')" style="margin-top: 20px;">Volver al Menú</button>
+            </div>
+        </div>
+
+        <div id="horarioScreen" class="screen">
+            <div class="header">
+                <h1>Mi Horario</h1>
+                <p>Horario de clases inscritas</p>
+            </div>
+            <div class="content">
+                <table class="horario-tabla">
+                    <thead>
+                        <tr>
+                            <th>Hora</th>
+                            <th>Lunes</th>
+                            <th>Martes</th>
+                            <th>Miércoles</th>
+                            <th>Jueves</th>
+                            <th>Viernes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="horarioBody"></tbody>
+                </table>
+                <button class="btn btn-secondary" onclick="showScreen('menuScreen')" style="margin-top: 20px;">Volver al Menú</button>
+            </div>
+        </div>
+
+        <div id="resumenScreen" class="screen">
+            <div class="header">
+                <h1>Resumen de Inscripción</h1>
+                <p>Materias inscritas en el semestre actual</p>
+            </div>
+            <div class="content">
+                <div class="resumen-inscripcion">
+                    <div class="resumen-item">
+                        <span>Total de materias:</span>
+                        <span id="resumenMaterias">0</span>
+                    </div>
+                    <div class="resumen-item">
+                        <span>Total de créditos:</span>
+                        <span id="resumenCreditos">0</span>
+                    </div>
+                </div>
+                <div class="materias-seleccionadas" id="resumenMateriasList"></div>
+                <button class="btn btn-secondary" onclick="showScreen('menuScreen')" style="margin-top: 20px;">Volver al Menú</button>
+            </div>
+        </div>
+
+        <div id="adminMenuScreen" class="screen">
+            <div class="header">
+                <h1>Panel de Administrador</h1>
+                <p>Bienvenido, <span id="adminName">Nombre Admin</span></p>
+            </div>
+            <div class="content">
+                <div class="nav-menu">
+                    <div class="menu-card" onclick="showScreen('adminAlumnosScreen')">
+                        <h3> Gestionar Alumnos</h3>
+                        <p>Ver, crear y editar alumnos</p>
+                    </div>
+                    <div class="menu-card" onclick="showScreen('adminMateriasScreen')">
+                        <h3> Gestionar Materias</h3>
+                        <p>Catálogo de materias</p>
+                    </div>
+                    <div class="menu-card" onclick="showScreen('adminGruposScreen')">
+                        <h3> Gestionar Grupos</h3>
+                        <p>Crear grupos y asignar horarios</p>
+                    </div>
+                    <div class="menu-card" onclick="showScreen('adminProfesoresScreen')">
+                        <h3> Gestionar Profesores</h3>
+                        <p>Ver y crear profesores</p>
+                    </div>
+                    <div class="menu-card" onclick="showScreen('adminCalificacionesScreen')">
+                        <h3> Registrar Calificaciones</h3>
+                        <p>Asignar calificaciones finales</p>
+                    </div>
+                    <div class="menu-card" onclick="logout()">
+                        <h3> Cerrar Sesión</h3>
+                        <p>Salir del panel</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="adminAlumnosScreen" class="screen">
+            <div class="header">
+                <h1>Gestionar Alumnos</h1>
+                <p>Crear, ver y editar alumnos</p>
+            </div>
+            <div class="content">
+                <div class="admin-form-container">
+                    <h3 style="margin-bottom: 20px;">Crear Nuevo Alumno</h3>
+                    <form id="formCrearAlumno">
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="adminNombre">Nombre Completo</label>
+                                <input type="text" id="adminNombre" required>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="adminEmail">Email (Usuario)</label>
+                                <input type="email" id="adminEmail" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="adminMatricula">Matrícula</label>
+                                <input type="text" id="adminMatricula" required>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="adminPassword">Contraseña Inicial</label>
+                                <input type="password" id="adminPassword" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="adminCarrera">Carrera</label>
+                            <input type="text" id="adminCarrera">
+                        </div>
+                        <div id="adminAlumnoError" class="alert alert-danger" style="display: none;"></div>
+                        <div id="adminAlumnoExito" class="alert alert-success" style="display: none;"></div>
+                        <button type="submit" class="btn">Crear Alumno</button>
+                    </form>
+                </div>
+                <hr style="margin: 30px 0;">
+                <h3 style="margin-bottom: 20px;">Alumnos Registrados</h3>
+                <table class="horario-tabla">
+                    <thead>
+                        <tr>
+                            <th>Matrícula</th>
+                            <th>Nombre Completo</th>
+                            <th>Email (Usuario)</th>
+                            <th>Carrera</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaAlumnosBody"></tbody>
+                </table>
+                <button class="btn btn-secondary" onclick="showScreen('adminMenuScreen')" style="margin-top: 30px;">Volver al Menú Admin</button>
+            </div>
+        </div>
+
+        <div id="adminProfesoresScreen" class="screen">
+            <div class="header">
+                <h1>Gestionar Profesores</h1>
+                <p>Crear y ver profesores</p>
+            </div>
+            <div class="content">
+                <div class="admin-form-container">
+                    <h3 style="margin-bottom: 20px;">Crear Nuevo Profesor</h3>
+                    <form id="formCrearProfesor">
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="adminProfNombre">Nombre Completo</label>
+                                <input type="text" id="adminProfNombre" required>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="adminProfEmail">Email (Usuario)</label>
+                                <input type="email" id="adminProfEmail" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="adminProfCedula">Cédula Profesional</label>
+                                <input type="text" id="adminProfCedula">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="adminProfPassword">Contraseña Inicial</label>
+                                <input type="password" id="adminProfPassword" required>
+                            </div>
+                        </div>
+                        <div id="adminProfesorError" class="alert alert-danger" style="display: none;"></div>
+                        <div id="adminProfesorExito" class="alert alert-success" style="display: none;"></div>
+                        <button type="submit" class="btn">Crear Profesor</button>
+                    </form>
+                </div>
+                <hr style="margin: 30px 0;">
+                <h3 style="margin-bottom: 20px;">Profesores Registrados</h3>
+                <table class="horario-tabla">
+                    <thead>
+                        <tr>
+                            <th>Nombre Completo</th>
+                            <th>Email (Usuario)</th>
+                            <th>Cédula</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaProfesoresBody"></tbody>
+                </table>
+                <button class="btn btn-secondary" onclick="showScreen('adminMenuScreen')" style="margin-top: 30px;">Volver al Menú Admin</button>
+            </div>
+        </div>
+
+        <div id="adminMateriasScreen" class="screen">
+            <div class="header">
+                <h1>Gestionar Catálogo de Materias</h1>
+                <p>Crear y ver materias</p>
+            </div>
+            <div class="content">
+                <div class="admin-form-container">
+                    <h3 style="margin-bottom: 20px;">Crear Nueva Materia</h3>
+                    <form id="formCrearMateria">
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="adminMateriaNombre">Nombre de la Materia</label>
+                                <input type="text" id="adminMateriaNombre" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="adminMateriaClave">Clave de Materia</label>
+                                <input type="text" id="adminMateriaClave" placeholder="Ej: 1401" required>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="adminMateriaCreditos">Créditos</label>
+                                <input type="number" id="adminMateriaCreditos" required>
+                            </div>
+                        </div>
+                        <div id="adminMateriaError" class="alert alert-danger" style="display: none;"></div>
+                        <div id="adminMateriaExito" class="alert alert-success" style="display: none;"></div>
+                        <button type="submit" class="btn">Crear Materia</button>
+                    </form>
+                </div>
+                <hr style="margin: 30px 0;">
+                <h3 style="margin-bottom: 20px;">Catálogo de Materias</h3>
+                <table class="horario-tabla">
+                    <thead>
+                        <tr>
+                            <th>Clave</th>
+                            <th>Nombre</th>
+                            <th>Créditos</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaMateriasBody"></tbody>
+                </table>
+                <button class="btn btn-secondary" onclick="showScreen('adminMenuScreen')" style="margin-top: 30px;">Volver al Menú Admin</button>
+            </div>
+        </div>
+        
+        <div id="adminGruposScreen" class="screen">
+            <div class="header">
+                <h1>Gestionar Grupos (Clases)</h1>
+                <p>Crear y ver grupos para un periodo</p>
+            </div>
+            <div class="content">
+                
+                <div class="admin-form-container">
+                    <h3 style="margin-bottom: 20px;">Crear Nuevo Grupo</h3>
+                    <form id="formCrearGrupo">
+
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 2;">
+                                <label for="adminGrupoMateria">Materia</label>
+                                <select id="adminGrupoMateria" required>
+                                    <option value="">Cargando materias...</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="flex: 2;">
+                                <label for="adminGrupoProfesor">Profesor</label>
+                                <select id="adminGrupoProfesor" required>
+                                    <option value="">Cargando profesores...</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 2;">
+                                <label for="adminGrupoPeriodo">Periodo Escolar</label>
+                                <select id="adminGrupoPeriodo" required>
+                                    <option value="">Cargando periodos...</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="adminGrupoClave">Clave (Ej: 001)</label>
+                                <input type="text" id="adminGrupoClave" required>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="adminGrupoCupo">Cupo Máx.</label>
+                                <input type="number" id="adminGrupoCupo" required>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="adminGrupoAula">Aula</label>
+                                <input type="text" id="adminGrupoAula">
+                            </div>
+                        </div>
+
+                        <h4 style="margin-top: 10px; margin-bottom: 10px; color: #333;">Horario de la Clase</h4>
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 2;">
+                                <label>Días de la semana</label>
+                                <div class="checkbox-group" id="adminGrupoDias">
+                                    <label><input type="checkbox" name="adminGrupoDias" value="1"> Lunes</label>
+                                    <label><input type="checkbox" name="adminGrupoDias" value="2"> Martes</label>
+                                    <label><input type="checkbox" name="adminGrupoDias" value="3"> Miércoles</label>
+                                    <label><input type="checkbox" name="adminGrupoDias" value="4"> Jueves</label>
+                                    <label><input type="checkbox" name="adminGrupoDias" value="5"> Viernes</label>
+                                    <label><input type="checkbox" name="adminGrupoDias" value="6"> Sábado</label>
+                                </div>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="adminGrupoHoraInicio">Hora Inicio</label>
+                                <input type="time" id="adminGrupoHoraInicio" required>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="adminGrupoHoraFin">Hora Fin</label>
+                                <input type="time" id="adminGrupoHoraFin" required>
+                            </div>
+                        </div>
+
+                        <div id="adminGrupoError" class="alert alert-danger" style="display: none; margin-top: 15px;"></div>
+                        <div id="adminGrupoExito" class="alert alert-success" style="display: none; margin-top: 15px;"></div>
+                        
+                        <button type="submit" class="btn" style="margin-top: 20px;">Crear Grupo</button>
+                    </form>
+                </div>
+
+                <hr style="margin: 30px 0;">
+
+                <h3 style="margin-bottom: 20px;">Grupos Creados (Periodo Activo)</h3>
+                <table class="horario-tabla">
+                    <thead>
+                        <tr>
+                            <th>Grupo</th>
+                            <th>Materia</th>
+                            <th>Profesor</th>
+                            <th>Horario</th>
+                            <th>Aula</th>
+                            <th>Cupo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaGruposBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center;">Cargando...</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <button class="btn btn-secondary" onclick="showScreen('adminMenuScreen')" style="margin-top: 30px;">Volver al Menú Admin</button>
+            </div>
+        </div>
+        
+        <div id="adminCalificacionesScreen" class="screen">
+            <div class="header">
+                <h1>Registrar Calificaciones</h1>
+                <p>Seleccione un grupo para ver sus alumnos</p>
+            </div>
+            <div class="content">
+                
+                <div class="form-group">
+                    <label for="selectGrupoParaCalificar">Seleccionar Grupo</label>
+                    <select id="selectGrupoParaCalificar">
+                        <option value="">Cargando grupos...</option>
+                    </select>
+                </div>
+
+                <hr style="margin: 30px 0;">
+                
+                <form id="formGuardarCalificaciones">
+                    <h3 style="margin-bottom: 20px;">Alumnos Inscritos</h3>
+                    <table class="horario-tabla">
+                        <thead>
+                            <tr>
+                                <th>Matrícula</th>
+                                <th>Nombre del Alumno</th>
+                                <th>Calificación (0-100)</th>
+                                <th>Estatus</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaCalificacionesBody">
+                            <tr>
+                                <td colspan="4" style="text-align: center;">Seleccione un grupo para comenzar</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div id="adminCalificacionesError" class="alert alert-danger" style="display: none; margin-top: 15px;"></div>
+                    <div id="adminCalificacionesExito" class="alert alert-success" style="display: none; margin-top: 15px;"></div>
+
+                    <button type="submit" class="btn" style="margin-top: 20px;">Guardar Calificaciones</button>
+                </form>
+
+                <button class="btn btn-secondary" onclick="showScreen('adminMenuScreen')" style="margin-top: 30px;">Volver al Menú Admin</button>
+            </div>
+        </div>
+
+        <div id="editModal" class="modal-backdrop">
+            <div class="modal-content">
+                <span class="modal-close" onclick="cerrarModal()">&times;</span>
+                <h2 id="modalTitle">Editar</h2>
+                <div id="modalBody">
+                    </div>
+            </div>
+        </div>
+
+    </div> <script src="script.js"></script>
+</body>
+</html>
