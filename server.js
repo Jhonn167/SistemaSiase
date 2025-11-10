@@ -7,10 +7,10 @@ const port = 3000;
 
 const allowedOrigins = [
     'https://sistemasiase.onrender.com', 
+    'https://sistema-siase.vercel.app',   
     'http://localhost:3000',             
-    'http://localhost:5500',             
-    'http://127.0.0.1:5500',               
-    'https://sistema-siase.vercel.app',
+    'http://localhost:5500',           
+    'http://127.0.0.1:5500'             
 ];
 
 const corsOptions = {
@@ -34,9 +34,7 @@ const pool = mysql.createPool({
     password: process.env.DB_PASSWORD || '16112002', 
     database: process.env.DB_DATABASE || 'proyecto_escuela',
     port: process.env.DB_PORT || 3306, 
-    ssl: { "rejectUnauthorized": true }, 
-
-    ssl: { "rejectUnauthorized": true },
+    ssl: { "rejectUnauthorized": false },
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
